@@ -1,0 +1,138 @@
+//Nama : Andreas Nababan
+//NIM  : 1203230025
+#include <stdio.h>
+#include <stdlib.h>
+
+// Struktur untuk node di circular doubly linked list
+typedef struct Node {
+    int data; // Menyimpan data node
+    struct Node* next; // Pointer ke node berikutnya
+    struct Node* prev; // Pointer ke node sebelumnya
+} Node;
+
+Node *head = NULL; // Pointer untuk node kepala
+Node *tail = NULL; // Pointer untuk node ekor
+
+// Fungsi untuk membuat node baru
+Node* createNode(int data) {
+    Node* newNode = (Node*)malloc(sizeof(Node)); // Alokasi memori untuk node baru
+    newNode->data = data; // Set data node baru
+    newNode->next = NULL; // Inisialisasi pointer next dengan NULL
+    newNode->prev = NULL; // Inisialisasi pointer prev dengan NULL
+    return newNode; // Mengembalikan pointer ke node baru
+}
+
+// Fungsi untuk menyisipkan node di akhir list
+void insertNode(int data) {
+    Node *newNode = createNode(data); // Membuat node baru
+    if (head == NULL) { // Jika list kosong
+        head = newNode; // Set head ke node baru
+        tail = newNode; // Set tail ke node baru
+        newNode->next = newNode; // Pointer next dari node baru menunjuk ke dirinya sendiri
+        newNode->prev = newNode; // Pointer prev dari node baru menunjuk ke dirinya sendiri
+    } else {
+        tail->next = newNode; // Set next dari tail ke node baru
+        newNode->prev = tail; // Set prev dari node baru ke tail
+        newNode->next = head; // Set next dari node baru ke head
+        head->prev = newNode; // Set prev dari head ke node baru
+        tail = newNode; // Update tail ke node baru
+    }
+}
+
+// Fungsi untuk mencetak list
+void printList() {
+    Node *curr = head; // Mulai dari head
+    if (curr == NULL) { // Jika list kosong
+        printf("List is empty\n"); // Cetak pesan bahwa list kosong
+        return;
+    }
+
+    do {
+        printf("Address: %p, Data: %d\n", (unsigned long)curr, curr->data); // Cetak alamat dan data node
+        curr = curr->next; // Pindah ke node berikutnya
+    } while (curr != head); // Berhenti ketika kembali ke head
+}
+
+// Fungsi untuk menukar dua node
+void swapNodes(Node *a, Node *b) {
+    // Menukar node dengan menyesuaikan pointer
+    if (a->next == b) { // Jika a dan b bersebelahan
+        a->next = b->next; // Pointer next a ke next b
+        b->prev = a->prev; // Pointer prev b ke prev a
+        a->prev->next = b; // Pointer next dari prev a ke b
+        b->next->prev = a; // Pointer prev dari next b ke a
+        b->next = a; // Pointer next b ke a
+        a->prev = b; // Pointer prev a ke b
+    } else { // Jika a dan b tidak bersebelahan
+        Node *tempNext = a->next; // Simpan next a
+        Node *tempPrev = a->prev; // Simpan prev a
+        a->next = b->next; // Pointer next a ke next b
+        a->prev = b->prev; // Pointer prev a ke prev b
+        b->next = tempNext; // Pointer next b ke next a yang lama
+        b->prev = tempPrev; // Pointer prev b ke prev a yang lama
+        a->next->prev = a; // Pointer prev dari next a ke a
+        a->prev->next = a; // Pointer next dari prev a ke a
+        b->next->prev = b; // Pointer prev dari next b ke b
+        b->prev->next = b; // Pointer next dari prev b ke b
+    }
+
+    if (head == a) { // Jika a adalah head
+        head = b; // Set b sebagai head
+    } else if (head == b) { // Jika b adalah head
+        head = a; // Set a sebagai head
+    }
+
+    if (tail == a) { // Jika a adalah tail
+        tail = b; // Set b sebagai tail
+    } else if (tail == b) { // Jika b adalah tail
+        tail = a; // Set a sebagai tail
+    }
+}
+
+// Fungsi untuk mengurutkan list
+void sortList() {
+    if (head == NULL) return; // Jika list kosong, tidak perlu mengurutkan
+    Node* current;
+    int swapped;
+
+    do {
+        swapped = 0; // Inisialisasi swapped ke 0
+        current = head; // Mulai dari head
+        do {
+            Node *nextNode = current->next; // Ambil node berikutnya
+            if (current->data > nextNode->data) { // Jika data current lebih besar dari data nextNode
+                swapNodes(current, nextNode); // Tukar current dengan nextNode
+                swapped = 1; // Set swapped ke 1
+            } else {
+                current = nextNode; // Pindah ke node berikutnya
+            }
+        } while (current != tail); // Berhenti ketika kembali ke tail
+    } while (swapped); // Ulangi jika ada penukaran
+}
+
+int main() {
+    int N;
+    printf("Masukkan jumlah data: "); // Minta jumlah data
+    scanf("%d", &N); // Baca jumlah data
+
+    // Memasukkan data ke dalam list
+    for (int i = 0; i < N; i++) {
+        int input;
+        printf("Masukkan data ke-%d: ", i + 1); // Minta data ke-i
+        scanf("%d", &input); // Baca data
+        insertNode(input); // Masukkan data ke list
+    }
+
+    // Menampilkan list sebelum pengurutan
+    printf("\nList sebelum pengurutan:\n");
+    printList(); // Cetak list
+
+    // Mengurutkan list
+    sortList(); // Urutkan list
+
+    // Menampilkan list setelah pengurutan
+    printf("\nList setelah pengurutan:\n");
+    printList(); // Cetak list
+
+    return 0; // Kembalikan 0
+}
